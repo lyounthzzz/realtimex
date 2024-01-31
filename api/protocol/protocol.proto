@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package realtimex.protocol;
+
+option go_package = "github.com/lyounthzzz/realtimex/protocol;protocol";
+
+message Proto {
+  // 消息类型
+  int32 operation = 1;
+  // 消息序列
+  uint64 seqId = 2;
+  // 消息主体
+  bytes body = 3;
+  // 发送时间
+  uint64 sendTime = 4;
+}

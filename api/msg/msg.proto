@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package realtimex.msg;
+
+option go_package = "github.com/lyounthzzz/realtimex/msg;msg";
+
+service MsgService {
+  // 广播消息
+  rpc BroadcastMsg(Msg) returns (Empty);
+  // 推送用户消息
+  rpc PushMsg(UserMsg) returns (Empty);
+}
+
+message Msg {
+  // 主题通道
+  string topic = 1;
+  // 消息序列
+  uint64 seqId = 2;
+  // 消息内容
+  bytes body = 3;
+  // 消息发送时间
+  uint64 sendTime = 4;
+}
+
+message UserMsg {
+  // 用户id
+  string uid = 1;
+  // 消息
+  repeated Msg msgs = 2;
+}
+
+message Empty {}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package realtimex.gateway;
+
+option go_package = "github.com/lyounthzzz/realtimex/gateway;gateway";
+
+service GatewayService {
+
+}
+
+service PushService {
+
+}
+
+// 身份认证服务
+service AuthnService {
+  rpc DoAuthn(DoAuthNRequest) returns (User) {}
+}
+
+message DoAuthNRequest {
+  string token = 1;
+}
+
+message User {
+  string uid = 1;
+}
