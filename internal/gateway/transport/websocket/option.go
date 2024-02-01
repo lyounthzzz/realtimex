@@ -1,6 +1,9 @@
 package websocket
 
-import "github.com/gorilla/websocket"
+import (
+	"github.com/gorilla/websocket"
+	"github.com/lyounthzzz/realtimex/api/gateway"
+)
 
 type Option func(*Server)
 
@@ -14,4 +17,8 @@ func Path(path string) Option {
 
 func Upgrader(upgrader *websocket.Upgrader) Option {
 	return func(srv *Server) { srv.upgrader = upgrader }
+}
+
+func AuthnClient(client gateway.AuthnServiceClient) Option {
+	return func(srv *Server) { srv.authnC = client }
 }

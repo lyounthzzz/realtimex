@@ -5,8 +5,12 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/lyounthzzz/realtimex/api/gateway"
 	"github.com/lyounthzzz/realtimex/api/protocol"
+	"github.com/lyounthzzz/realtimex/internal/gateway/operation"
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
+
+type sessionKey struct{}
 
 // Session todo sync.Pool 优化
 type Session struct {
@@ -33,32 +37,46 @@ func (sess *Session) Listen() {
 			}
 		}
 
+		var p *protocol.Proto
 		switch msgType {
 		case websocket.TextMessage:
-			proto := &protocol.Proto{}
-
-			if err = protojson.Unmarshal(data, proto); err != nil {
+			p = &protocol.Proto{}
+			if err = protojson.Unmarshal(data, p); err != nil {
 				// todo
-				return
-			}
-			if err = sess.Server.protoHandler(context.Background(), proto); err != nil {
-				// todo
-				return
+				continue
 			}
 		case websocket.CloseMessage:
-			sess.Close()
+			p = &protocol.Proto{
+				Operation: operation.Close,
+			}
 		case websocket.PingMessage:
-			// todo
+			p = &protocol.Proto{
+				Operation: operation.Ping,
+			}
 		case websocket.PongMessage:
-			// todo
+			p = &protocol.Proto{
+				Operation: operation.Pong,
+			}
 		default:
+			continue
+		}
 
+		var (
+			ctx   = context.WithValue(context.Background(), sessionKey{}, sess)
+			reply proto.Message
+		)
+		if reply, err = sess.Server.protoHandler(ctx, p); err != nil {
+			// todo
+			return
+		}
+		if reply != nil {
+			_ = sess.WriteMessage(reply)
 		}
 	}
 }
 
-func (sess *Session) Write(proto *protocol.Proto) error {
-	body, err := protojson.Marshal(proto)
+func (sess *Session) WriteMessage(msg proto.Message) error {
+	body, err := protojson.Marshal(msg)
 	if err != nil {
 		return err
 	}

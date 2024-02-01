@@ -2,10 +2,11 @@ package websocket
 
 import (
 	"context"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/lyounthzzz/realtimex/api/gateway"
-	"github.com/lyounthzzz/realtimex/pkg/processor"
+	"github.com/lyounthzzz/realtimex/pkg/middleware"
 	"net/http"
 	"time"
 )
@@ -37,7 +38,7 @@ type Server struct {
 	sessionsConnected chan *Session
 	sessionsToDropped chan *Session
 	authnC            gateway.AuthnServiceClient
-	protoHandler      processor.Handler
+	protoHandler      middleware.Handler
 }
 
 func NewServer(opts ...Option) *Server {
@@ -53,12 +54,18 @@ func NewServer(opts ...Option) *Server {
 	for _, opt := range opts {
 		opt(srv)
 	}
+	srv.Server = &http.Server{
+		Addr:    srv.address,
+		Handler: srv.router,
+	}
 
 	return srv
 }
 
 func (srv *Server) Start(ctx context.Context) error {
 	srv.initRouter()
+
+	fmt.Println("websocket server start")
 
 	if err := srv.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err

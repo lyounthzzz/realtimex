@@ -14,3 +14,10 @@ message Proto {
   // 发送时间
   uint64 sendTime = 4;
 }
+
+message ProtoAck {
+  // 消息序列
+  uint64 seqId = 1;
+  // 发送时间
+  uint64 sendTime = 2;
+}
