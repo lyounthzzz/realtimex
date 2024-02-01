@@ -13,23 +13,24 @@ func Logger() Middleware {
 	return func(next Handler) Handler {
 		return func(ctx context.Context, p *protocol.Proto) (proto.Message, error) {
 			var (
-				op        = p.Operation
-				ingress   = len(p.Body)
 				startTime = time.Now()
-				reply     proto.Message
-				replyBody []byte
-				err       error
 			)
 
-			reply, err = next(ctx, p)
-			if err == nil {
-				replyBody, _ = protojson.Marshal(p)
-			}
+			reply, err := next(ctx, p)
+
+			body, _ := protojson.Marshal(p)
+			kvs := make([]any, 0)
+			kvs = append(kvs, "msg", string(body))
+			kvs = append(kvs, "operation", p.Operation)
+			kvs = append(kvs, "ingress", len(body))
+			kvs = append(kvs, "latency", time.Since(startTime).Seconds())
+			kvs = append(kvs, "msg", string(body))
 
 			if err != nil {
-				log.Context(ctx).Errorf(err.Error(), op, ingress, time.Since(startTime).Seconds())
+				kvs = append(kvs, "error", err.Error())
+				log.Context(ctx).Errorw(kvs...)
 			} else {
-				log.Context(ctx).Infof(string(replyBody), op, ingress, time.Since(startTime).Seconds())
+				log.Context(ctx).Infow(kvs...)
 			}
 
 			return reply, err

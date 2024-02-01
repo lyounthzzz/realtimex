@@ -7,6 +7,9 @@
   "tags": [
     {
       "name": "MsgService"
+    },
+    {
+      "name": "MsgPushService"
     }
   ],
   "consumes": [

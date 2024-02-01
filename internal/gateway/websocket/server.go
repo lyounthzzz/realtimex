@@ -6,7 +6,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/lyounthzzz/realtimex/api/gateway"
-	"github.com/lyounthzzz/realtimex/pkg/middleware"
 	"net/http"
 	"time"
 )
@@ -38,7 +37,6 @@ type Server struct {
 	sessionsConnected chan *Session
 	sessionsToDropped chan *Session
 	authnC            gateway.AuthnServiceClient
-	protoHandler      middleware.Handler
 }
 
 func NewServer(opts ...Option) *Server {
@@ -110,8 +108,6 @@ func (srv *Server) websocketHandler() http.Handler {
 			Server: srv,
 		}
 		srv.sessionsConnected <- session
-
-		go session.Listen()
 	})
 }
 
