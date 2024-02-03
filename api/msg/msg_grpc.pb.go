@@ -22,18 +22,18 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MsgServiceClient interface {
-	// 订阅主题
-	Subscribe(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*Empty, error)
-	// 取消订阅主题
-	Unsubscribe(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*Empty, error)
-	// 发布消息
-	Publish(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*Empty, error)
-	// 心跳
-	Heartbeat(ctx context.Context, in *HeartbeatReq, opts ...grpc.CallOption) (*Empty, error)
 	// 连接
-	Connect(ctx context.Context, in *ConnectReq, opts ...grpc.CallOption) (*Empty, error)
+	Connect(ctx context.Context, in *ConnectReq, opts ...grpc.CallOption) (*ConnectAck, error)
+	// 订阅主题
+	Subscribe(ctx context.Context, in *SubscribeReq, opts ...grpc.CallOption) (*SubscribeAck, error)
+	// 取消订阅主题
+	Unsubscribe(ctx context.Context, in *UnsubscribeReq, opts ...grpc.CallOption) (*UnsubscribeAck, error)
+	// 发布消息
+	Publish(ctx context.Context, in *PublishReq, opts ...grpc.CallOption) (*PublishAck, error)
+	// 心跳
+	Ping(ctx context.Context, in *PingReq, opts ...grpc.CallOption) (*PingAck, error)
 	// 断开连接
-	Disconnect(ctx context.Context, in *DisconnectReq, opts ...grpc.CallOption) (*Empty, error)
+	Disconnect(ctx context.Context, in *DisconnectReq, opts ...grpc.CallOption) (*DisconnectAck, error)
 }
 
 type msgServiceClient struct {
@@ -44,44 +44,8 @@ func NewMsgServiceClient(cc grpc.ClientConnInterface) MsgServiceClient {
 	return &msgServiceClient{cc}
 }
 
-func (c *msgServiceClient) Subscribe(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Subscribe", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgServiceClient) Unsubscribe(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Unsubscribe", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgServiceClient) Publish(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Publish", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgServiceClient) Heartbeat(ctx context.Context, in *HeartbeatReq, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Heartbeat", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgServiceClient) Connect(ctx context.Context, in *ConnectReq, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *msgServiceClient) Connect(ctx context.Context, in *ConnectReq, opts ...grpc.CallOption) (*ConnectAck, error) {
+	out := new(ConnectAck)
 	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Connect", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -89,8 +53,44 @@ func (c *msgServiceClient) Connect(ctx context.Context, in *ConnectReq, opts ...
 	return out, nil
 }
 
-func (c *msgServiceClient) Disconnect(ctx context.Context, in *DisconnectReq, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *msgServiceClient) Subscribe(ctx context.Context, in *SubscribeReq, opts ...grpc.CallOption) (*SubscribeAck, error) {
+	out := new(SubscribeAck)
+	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Subscribe", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgServiceClient) Unsubscribe(ctx context.Context, in *UnsubscribeReq, opts ...grpc.CallOption) (*UnsubscribeAck, error) {
+	out := new(UnsubscribeAck)
+	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Unsubscribe", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgServiceClient) Publish(ctx context.Context, in *PublishReq, opts ...grpc.CallOption) (*PublishAck, error) {
+	out := new(PublishAck)
+	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Publish", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgServiceClient) Ping(ctx context.Context, in *PingReq, opts ...grpc.CallOption) (*PingAck, error) {
+	out := new(PingAck)
+	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Ping", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgServiceClient) Disconnect(ctx context.Context, in *DisconnectReq, opts ...grpc.CallOption) (*DisconnectAck, error) {
+	out := new(DisconnectAck)
 	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgService/Disconnect", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -102,18 +102,18 @@ func (c *msgServiceClient) Disconnect(ctx context.Context, in *DisconnectReq, op
 // All implementations must embed UnimplementedMsgServiceServer
 // for forward compatibility
 type MsgServiceServer interface {
-	// 订阅主题
-	Subscribe(context.Context, *Msg) (*Empty, error)
-	// 取消订阅主题
-	Unsubscribe(context.Context, *Msg) (*Empty, error)
-	// 发布消息
-	Publish(context.Context, *Msg) (*Empty, error)
-	// 心跳
-	Heartbeat(context.Context, *HeartbeatReq) (*Empty, error)
 	// 连接
-	Connect(context.Context, *ConnectReq) (*Empty, error)
+	Connect(context.Context, *ConnectReq) (*ConnectAck, error)
+	// 订阅主题
+	Subscribe(context.Context, *SubscribeReq) (*SubscribeAck, error)
+	// 取消订阅主题
+	Unsubscribe(context.Context, *UnsubscribeReq) (*UnsubscribeAck, error)
+	// 发布消息
+	Publish(context.Context, *PublishReq) (*PublishAck, error)
+	// 心跳
+	Ping(context.Context, *PingReq) (*PingAck, error)
 	// 断开连接
-	Disconnect(context.Context, *DisconnectReq) (*Empty, error)
+	Disconnect(context.Context, *DisconnectReq) (*DisconnectAck, error)
 	mustEmbedUnimplementedMsgServiceServer()
 }
 
@@ -121,22 +121,22 @@ type MsgServiceServer interface {
 type UnimplementedMsgServiceServer struct {
 }
 
-func (UnimplementedMsgServiceServer) Subscribe(context.Context, *Msg) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
-}
-func (UnimplementedMsgServiceServer) Unsubscribe(context.Context, *Msg) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Unsubscribe not implemented")
-}
-func (UnimplementedMsgServiceServer) Publish(context.Context, *Msg) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Publish not implemented")
-}
-func (UnimplementedMsgServiceServer) Heartbeat(context.Context, *HeartbeatReq) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
-}
-func (UnimplementedMsgServiceServer) Connect(context.Context, *ConnectReq) (*Empty, error) {
+func (UnimplementedMsgServiceServer) Connect(context.Context, *ConnectReq) (*ConnectAck, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Connect not implemented")
 }
-func (UnimplementedMsgServiceServer) Disconnect(context.Context, *DisconnectReq) (*Empty, error) {
+func (UnimplementedMsgServiceServer) Subscribe(context.Context, *SubscribeReq) (*SubscribeAck, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
+}
+func (UnimplementedMsgServiceServer) Unsubscribe(context.Context, *UnsubscribeReq) (*UnsubscribeAck, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unsubscribe not implemented")
+}
+func (UnimplementedMsgServiceServer) Publish(context.Context, *PublishReq) (*PublishAck, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Publish not implemented")
+}
+func (UnimplementedMsgServiceServer) Ping(context.Context, *PingReq) (*PingAck, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+}
+func (UnimplementedMsgServiceServer) Disconnect(context.Context, *DisconnectReq) (*DisconnectAck, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Disconnect not implemented")
 }
 func (UnimplementedMsgServiceServer) mustEmbedUnimplementedMsgServiceServer() {}
@@ -150,78 +150,6 @@ type UnsafeMsgServiceServer interface {
 
 func RegisterMsgServiceServer(s grpc.ServiceRegistrar, srv MsgServiceServer) {
 	s.RegisterService(&MsgService_ServiceDesc, srv)
-}
-
-func _MsgService_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Msg)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServiceServer).Subscribe(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/realtimex.msg.MsgService/Subscribe",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServiceServer).Subscribe(ctx, req.(*Msg))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MsgService_Unsubscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Msg)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServiceServer).Unsubscribe(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/realtimex.msg.MsgService/Unsubscribe",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServiceServer).Unsubscribe(ctx, req.(*Msg))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MsgService_Publish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Msg)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServiceServer).Publish(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/realtimex.msg.MsgService/Publish",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServiceServer).Publish(ctx, req.(*Msg))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MsgService_Heartbeat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HeartbeatReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServiceServer).Heartbeat(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/realtimex.msg.MsgService/Heartbeat",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServiceServer).Heartbeat(ctx, req.(*HeartbeatReq))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _MsgService_Connect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -238,6 +166,78 @@ func _MsgService_Connect_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServiceServer).Connect(ctx, req.(*ConnectReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MsgService_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubscribeReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServiceServer).Subscribe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/realtimex.msg.MsgService/Subscribe",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServiceServer).Subscribe(ctx, req.(*SubscribeReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MsgService_Unsubscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnsubscribeReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServiceServer).Unsubscribe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/realtimex.msg.MsgService/Unsubscribe",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServiceServer).Unsubscribe(ctx, req.(*UnsubscribeReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MsgService_Publish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServiceServer).Publish(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/realtimex.msg.MsgService/Publish",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServiceServer).Publish(ctx, req.(*PublishReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MsgService_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServiceServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/realtimex.msg.MsgService/Ping",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServiceServer).Ping(ctx, req.(*PingReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -268,6 +268,10 @@ var MsgService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*MsgServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Connect",
+			Handler:    _MsgService_Connect_Handler,
+		},
+		{
 			MethodName: "Subscribe",
 			Handler:    _MsgService_Subscribe_Handler,
 		},
@@ -280,12 +284,8 @@ var MsgService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MsgService_Publish_Handler,
 		},
 		{
-			MethodName: "Heartbeat",
-			Handler:    _MsgService_Heartbeat_Handler,
-		},
-		{
-			MethodName: "Connect",
-			Handler:    _MsgService_Connect_Handler,
+			MethodName: "Ping",
+			Handler:    _MsgService_Ping_Handler,
 		},
 		{
 			MethodName: "Disconnect",
@@ -296,126 +296,126 @@ var MsgService_ServiceDesc = grpc.ServiceDesc{
 	Metadata: "api/msg/msg.proto",
 }
 
-// MsgPushServiceClient is the client API for MsgPushService service.
+// PushServiceClient is the client API for PushService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type MsgPushServiceClient interface {
+type PushServiceClient interface {
 	// 广播消息
-	BroadcastMsg(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*Empty, error)
-	// 推送用户消息
-	PushMsg(ctx context.Context, in *UserMsg, opts ...grpc.CallOption) (*Empty, error)
+	Broadcast(ctx context.Context, in *PushMsg, opts ...grpc.CallOption) (*BroadcastResp, error)
+	// 推送消息
+	Push(ctx context.Context, in *PushMsg, opts ...grpc.CallOption) (*PushMsgResp, error)
 }
 
-type msgPushServiceClient struct {
+type pushServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewMsgPushServiceClient(cc grpc.ClientConnInterface) MsgPushServiceClient {
-	return &msgPushServiceClient{cc}
+func NewPushServiceClient(cc grpc.ClientConnInterface) PushServiceClient {
+	return &pushServiceClient{cc}
 }
 
-func (c *msgPushServiceClient) BroadcastMsg(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgPushService/BroadcastMsg", in, out, opts...)
+func (c *pushServiceClient) Broadcast(ctx context.Context, in *PushMsg, opts ...grpc.CallOption) (*BroadcastResp, error) {
+	out := new(BroadcastResp)
+	err := c.cc.Invoke(ctx, "/realtimex.msg.PushService/Broadcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *msgPushServiceClient) PushMsg(ctx context.Context, in *UserMsg, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/realtimex.msg.MsgPushService/PushMsg", in, out, opts...)
+func (c *pushServiceClient) Push(ctx context.Context, in *PushMsg, opts ...grpc.CallOption) (*PushMsgResp, error) {
+	out := new(PushMsgResp)
+	err := c.cc.Invoke(ctx, "/realtimex.msg.PushService/Push", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MsgPushServiceServer is the server API for MsgPushService service.
-// All implementations must embed UnimplementedMsgPushServiceServer
+// PushServiceServer is the server API for PushService service.
+// All implementations must embed UnimplementedPushServiceServer
 // for forward compatibility
-type MsgPushServiceServer interface {
+type PushServiceServer interface {
 	// 广播消息
-	BroadcastMsg(context.Context, *Msg) (*Empty, error)
-	// 推送用户消息
-	PushMsg(context.Context, *UserMsg) (*Empty, error)
-	mustEmbedUnimplementedMsgPushServiceServer()
+	Broadcast(context.Context, *PushMsg) (*BroadcastResp, error)
+	// 推送消息
+	Push(context.Context, *PushMsg) (*PushMsgResp, error)
+	mustEmbedUnimplementedPushServiceServer()
 }
 
-// UnimplementedMsgPushServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedMsgPushServiceServer struct {
+// UnimplementedPushServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedPushServiceServer struct {
 }
 
-func (UnimplementedMsgPushServiceServer) BroadcastMsg(context.Context, *Msg) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BroadcastMsg not implemented")
+func (UnimplementedPushServiceServer) Broadcast(context.Context, *PushMsg) (*BroadcastResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Broadcast not implemented")
 }
-func (UnimplementedMsgPushServiceServer) PushMsg(context.Context, *UserMsg) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PushMsg not implemented")
+func (UnimplementedPushServiceServer) Push(context.Context, *PushMsg) (*PushMsgResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Push not implemented")
 }
-func (UnimplementedMsgPushServiceServer) mustEmbedUnimplementedMsgPushServiceServer() {}
+func (UnimplementedPushServiceServer) mustEmbedUnimplementedPushServiceServer() {}
 
-// UnsafeMsgPushServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to MsgPushServiceServer will
+// UnsafePushServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PushServiceServer will
 // result in compilation errors.
-type UnsafeMsgPushServiceServer interface {
-	mustEmbedUnimplementedMsgPushServiceServer()
+type UnsafePushServiceServer interface {
+	mustEmbedUnimplementedPushServiceServer()
 }
 
-func RegisterMsgPushServiceServer(s grpc.ServiceRegistrar, srv MsgPushServiceServer) {
-	s.RegisterService(&MsgPushService_ServiceDesc, srv)
+func RegisterPushServiceServer(s grpc.ServiceRegistrar, srv PushServiceServer) {
+	s.RegisterService(&PushService_ServiceDesc, srv)
 }
 
-func _MsgPushService_BroadcastMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Msg)
+func _PushService_Broadcast_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PushMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgPushServiceServer).BroadcastMsg(ctx, in)
+		return srv.(PushServiceServer).Broadcast(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/realtimex.msg.MsgPushService/BroadcastMsg",
+		FullMethod: "/realtimex.msg.PushService/Broadcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgPushServiceServer).BroadcastMsg(ctx, req.(*Msg))
+		return srv.(PushServiceServer).Broadcast(ctx, req.(*PushMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MsgPushService_PushMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserMsg)
+func _PushService_Push_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PushMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgPushServiceServer).PushMsg(ctx, in)
+		return srv.(PushServiceServer).Push(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/realtimex.msg.MsgPushService/PushMsg",
+		FullMethod: "/realtimex.msg.PushService/Push",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgPushServiceServer).PushMsg(ctx, req.(*UserMsg))
+		return srv.(PushServiceServer).Push(ctx, req.(*PushMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// MsgPushService_ServiceDesc is the grpc.ServiceDesc for MsgPushService service.
+// PushService_ServiceDesc is the grpc.ServiceDesc for PushService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var MsgPushService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "realtimex.msg.MsgPushService",
-	HandlerType: (*MsgPushServiceServer)(nil),
+var PushService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "realtimex.msg.PushService",
+	HandlerType: (*PushServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "BroadcastMsg",
-			Handler:    _MsgPushService_BroadcastMsg_Handler,
+			MethodName: "Broadcast",
+			Handler:    _PushService_Broadcast_Handler,
 		},
 		{
-			MethodName: "PushMsg",
-			Handler:    _MsgPushService_PushMsg_Handler,
+			MethodName: "Push",
+			Handler:    _PushService_Push_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

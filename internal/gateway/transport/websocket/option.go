@@ -3,7 +3,26 @@ package websocket
 import (
 	"github.com/gorilla/websocket"
 	"github.com/lyounthzzz/realtimex/api/gateway"
+	"time"
 )
+
+const (
+	defaultAddress          = ":8000"
+	defaultPath             = "/gateway/ws/v1"
+	defaultSessConnectedCap = 2048
+	defaultSessDroppedCap   = 2048
+)
+
+var defaultWebsocketUpgrader = &websocket.Upgrader{
+	HandshakeTimeout:  time.Second,
+	ReadBufferSize:    10 * 1024 * 1024, // 10k
+	WriteBufferSize:   64 * 1024 * 1024, // 64k
+	WriteBufferPool:   nil,
+	Subprotocols:      nil,
+	Error:             nil,
+	CheckOrigin:       nil,
+	EnableCompression: true,
+}
 
 type Option func(*Server)
 

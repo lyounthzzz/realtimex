@@ -6,73 +6,87 @@ option go_package = "github.com/lyounthzzz/realtimex/msg;msg";
 
 // 消息服务 处理网关上行消息
 service MsgService {
-  // 订阅主题
-  rpc Subscribe(Msg) returns (Empty);
-  // 取消订阅主题
-  rpc Unsubscribe(Msg) returns (Empty);
-  // 发布消息
-  rpc Publish(Msg) returns (Empty);
-  // 心跳
-  rpc Heartbeat(HeartbeatReq) returns (Empty);
   // 连接
-  rpc Connect(ConnectReq) returns (Empty);
+  rpc Connect(ConnectReq) returns (ConnectAck);
+  // 订阅主题
+  rpc Subscribe(SubscribeReq) returns (SubscribeAck);
+  // 取消订阅主题
+  rpc Unsubscribe(UnsubscribeReq) returns (UnsubscribeAck);
+  // 发布消息
+  rpc Publish(PublishReq) returns (PublishAck);
+  // 心跳
+  rpc Ping(PingReq) returns (PingAck);
   // 断开连接
-  rpc Disconnect(DisconnectReq) returns (Empty);
+  rpc Disconnect(DisconnectReq) returns (DisconnectAck);
 }
 
 // 消息推送服务 处理网关下行消息
-service MsgPushService {
+service PushService {
   // 广播消息
-  rpc BroadcastMsg(Msg) returns (Empty);
-  // 推送用户消息
-  rpc PushMsg(UserMsg) returns (Empty);
+  rpc Broadcast(PushMsg) returns (BroadcastResp);
+  // 推送消息
+  rpc Push(PushMsg) returns (PushMsgResp);
 }
-
-message Msg {
-  // 主题通道
-  string topic = 1;
-  // 消息序列
-  uint64 seqId = 2;
-  // 消息内容
-  bytes body = 3;
-  // 消息发送时间
-  uint64 sendTime = 4;
-}
-
-message UserMsg {
-  // 用户id
-  string uid = 1;
-  // 消息
-  repeated Msg msgs = 2;
-}
-
-message Empty {}
 
 message SubscribeReq {
-  // 主题通道
-  string topic = 1;
-  // 用户id
-  string uid = 2;
+  // 消息id
+  uint64 msgId = 1;
+  // 主题列表
+  repeated string topics = 2;
+}
+
+message SubscribeAck {
+  // 消息id
+  uint64 msgId = 1;
 }
 
 message UnsubscribeReq {
+  // 消息id
+  string msgId = 1;
+  // 主题列表
+  repeated string topics = 2;
+}
+
+message UnsubscribeAck {
+  // 消息id
+  uint64 msgId = 1;
+}
+
+message PublishReq {
   // 主题通道
   string topic = 1;
-  // 用户id
-  string uid = 2;
+  // 消息id
+  uint64 msgId = 2;
+  // 消息内容
+  bytes payload = 3;
 }
 
-message HeartbeatReq {
-  // 用户id
-  string uid = 1;
+message PublishAck {
+  // 消息id
+  uint64 msgId = 1;
 }
 
-message ConnectReq {
+message PingReq {}
+
+message PingAck {}
+
+message ConnectReq {}
+
+message ConnectAck {}
+
+message DisconnectReq {}
+
+message DisconnectAck {}
+
+message PushMsg {
   // 用户id
-  string uid = 1;
+  string topic = 1;
+  // 消息id
+  uint64 msgId = 2;
+  // 消息内容
+  bytes payload = 3;
 }
 
-message DisconnectReq {
-  // 用户id
-  string uid = 1;
-}
+message PushMsgResp {}
+
+message BroadcastResp {}

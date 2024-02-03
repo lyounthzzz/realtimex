@@ -9,7 +9,7 @@
       "name": "MsgService"
     },
     {
-      "name": "MsgPushService"
+      "name": "PushService"
     }
   ],
   "consumes": [
@@ -20,30 +20,48 @@
   ],
   "paths": {},
   "definitions": {
-    "msgEmpty": {
+    "msgBroadcastResp": {
       "type": "object"
     },
-    "msgMsg": {
+    "msgConnectAck": {
+      "type": "object"
+    },
+    "msgDisconnectAck": {
+      "type": "object"
+    },
+    "msgPingAck": {
+      "type": "object"
+    },
+    "msgPublishAck": {
       "type": "object",
       "properties": {
-        "topic": {
-          "type": "string",
-          "title": "主题通道"
-        },
-        "seqId": {
+        "msgId": {
           "type": "string",
           "format": "uint64",
-          "title": "消息序列"
-        },
-        "body": {
-          "type": "string",
-          "format": "byte",
-          "title": "消息内容"
-        },
-        "sendTime": {
+          "title": "消息id"
+        }
+      }
+    },
+    "msgPushMsgResp": {
+      "type": "object"
+    },
+    "msgSubscribeAck": {
+      "type": "object",
+      "properties": {
+        "msgId": {
           "type": "string",
           "format": "uint64",
-          "title": "消息发送时间"
+          "title": "消息id"
+        }
+      }
+    },
+    "msgUnsubscribeAck": {
+      "type": "object",
+      "properties": {
+        "msgId": {
+          "type": "string",
+          "format": "uint64",
+          "title": "消息id"
         }
       }
     },
